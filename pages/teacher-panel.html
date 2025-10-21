@@ -1,0 +1,111 @@
+<div class="panel-page teacher-panel">
+    <div class="panel-header">
+        <h1><i class="fas fa-chalkboard-teacher"></i> Painel do Professor</h1>
+        
+        <!-- Room Code Display -->
+        <div class="room-code-display">
+            <div class="code-info">
+                <span class="code-label">Código da Sala:</span>
+                <span class="code-value" id="teacher-room-code">------</span>
+                <button class="btn btn-small btn-secondary" onclick="generateNewRoomCode()">
+                    <i class="fas fa-sync-alt"></i>
+                    Gerar Novo
+                </button>
+            </div>
+            <div class="room-status">
+                <i class="fas fa-circle status-indicator active"></i>
+                <span class="student-count">(<span id="connected-students">0</span> alunos conectados)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-grid">
+        <!-- Gerar QR Code -->
+        <div class="panel-card" onclick="generateQRCode()">
+            <div class="card-icon">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            <h3>Gerar QR Code</h3>
+            <p>Crie QR Code para acesso à sala</p>
+        </div>
+
+        <!-- Quiz -->
+
+
+        <!-- Mãos Levantadas -->
+        <div class="panel-card" onclick="openRaisedHands()">
+            <div class="card-icon">
+                <i class="fas fa-hand-paper"></i>
+            </div>
+            <h3>Mãos Levantadas</h3>
+            <p>Veja quem quer falar</p>
+        </div>
+
+    </div>
+
+    <!-- Seções de conteúdo -->
+    <div class="content-sections">
+        <!-- QR Code Section -->
+        <div class="content-section" id="qr-code-section" style="display: none;">
+            <div class="section-header">
+                <h2>QR Code</h2>
+                <button class="btn btn-secondary" onclick="closeAllSections()">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+            <div class="qr-code-content">
+                <div class="qr-code-display">
+                    <div class="qr-code-container" id="qr-code-container">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                    <div class="qr-code-info">
+                        <p><strong>Código da Sala:</strong> <span id="qr-room-code">------</span></p>
+                    </div>
+                </div>
+                <div class="qr-code-actions">
+                    <button class="btn btn-primary" onclick="downloadQRCode()">
+                        <i class="fas fa-download"></i>
+                        Baixar QR Code
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Raised Hands Section -->
+        <div class="content-section" id="raised-hands-section" style="display: none;">
+            <div class="section-header">
+                <h2>Mãos Levantadas</h2>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="HandRaiseManager.clearAllHands()">
+                        <i class="fas fa-eraser"></i>
+                        Limpar
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeAllSections()">
+                        <i class="fas fa-times"></i>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+            <div class="raised-hands-list"></div>
+        </div>
+        
+    </div>
+</div>
+
+
+<script type="module">
+    import { HandRaiseManager } from '../js/hand-raise.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        HandRaiseManager.init();
+    });
+
+    window.HandRaiseManager = HandRaiseManager;
+    window.acknowledgeHand = HandRaiseManager.acknowledgeHand;
+    window.openRaisedHands = () => {
+        document.querySelectorAll('.content-section').forEach(section => section.style.display = 'none');
+        document.getElementById('raised-hands-section').style.display = 'block';
+        HandRaiseManager.updateTeacherHandsDisplay();
+    };
+</script>
