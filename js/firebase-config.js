@@ -13,13 +13,13 @@ import { getStorage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-s
 // };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAwlW14zPn0xmbY8It6dkfgCq1JyfsXyM8",
-  authDomain: "salavirtual-8ea9d.firebaseapp.com",
-  projectId: "salavirtual-8ea9d",
-  storageBucket: "salavirtual-8ea9d.firebasestorage.app",
-  messagingSenderId: "447951836371",
-  appId: "1:447951836371:web:f105971fbb2aee7fd2b026",
-  measurementId: "G-87C09N5D2C"
+  apiKey: "AIzaSyAnB-0u26pOsGDFzB-lWMw4fLRoac-W3Xg",
+  authDomain: "salavirtual-aa697.firebaseapp.com",
+  projectId: "salavirtual-aa697",
+  storageBucket: "salavirtual-aa697.firebasestorage.app",
+  messagingSenderId: "1004238284597",
+  appId: "1:1004238284597:web:69a7343195704b99730e7c",
+  measurementId: "G-Y0PK45VG5M"
 };
 
 const app = initializeApp(firebaseConfig);
