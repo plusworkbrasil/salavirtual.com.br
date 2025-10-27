@@ -86,35 +86,6 @@ function exibirMenu() {
 }
 
 
-
-// Attendance Record Component
-function createAttendanceRecord(record) {
-    const item = DOM.create('div', { className: 'attendance-record' });
-
-    const photo = DOM.create('img', {
-        className: 'attendance-photo',
-        src: record.photo,
-        alt: 'Foto de presença'
-    });
-
-    const info = DOM.create('div', { className: 'attendance-info' });
-    const name = DOM.create('h4', {}, record.student);
-    const details = DOM.create('p', {}, `${record.class} - ${DateUtils.formatDate(record.date)} às ${record.time}`);
-
-    info.appendChild(name);
-    info.appendChild(details);
-
-    const status = DOM.create('div', {
-        className: `attendance-status ${record.status}`
-    }, record.status === 'present' ? 'Presente' : 'Ausente');
-
-    item.appendChild(photo);
-    item.appendChild(info);
-    item.appendChild(status);
-
-    return item;
-}
-
 // Modal Component
 function createModal(id, title, content, actions = []) {
     const modal = DOM.create('div', {
@@ -157,74 +128,6 @@ function createModal(id, title, content, actions = []) {
 
     return modal;
 }
-// Utility Functions
-function getFileIcon(fileType) {
-    const iconMap = {
-        'pdf': 'fas fa-file-pdf',
-        'doc': 'fas fa-file-word',
-        'docx': 'fas fa-file-word',
-        'txt': 'fas fa-file-alt',
-        'video': 'fas fa-video',
-        'mp4': 'fas fa-video',
-        'jpg': 'fas fa-image',
-        'jpeg': 'fas fa-image',
-        'png': 'fas fa-image',
-        'gif': 'fas fa-image',
-        'link': 'fas fa-link'
-    };
-
-    return iconMap[fileType] || 'fas fa-file';
-}
-
-// Load Functions
-function loadStudentClasses() {
-    const container = DOM.get('student-classes-grid');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    AppState.classes.forEach(classData => {
-        const card = createClassCard(classData, 'student');
-        container.appendChild(card);
-    });
-}
-
-function loadTeacherClasses() {
-    const container = DOM.get('teacher-classes-grid');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    AppState.classes.forEach(classData => {
-        const card = createClassCard(classData, 'teacher');
-        container.appendChild(card);
-    });
-}
-
-function populateClassSelects() {
-    const selects = [
-        'temp-link-class',
-        'material-class',
-        'quiz-class',
-        'attendance-class-filter'
-    ];
-
-    selects.forEach(selectId => {
-        const select = DOM.get(selectId);
-        if (select) {
-            // Clear existing options except first
-            while (select.children.length > 1) {
-                select.removeChild(select.lastChild);
-            }
-
-            // Add class options
-            AppState.classes.forEach(classData => {
-                const option = DOM.create('option', { value: classData.id }, classData.name);
-                select.appendChild(option);
-            });
-        }
-    });
-}
 
 // Interactive Functions
 function toggleClassMenu(classId) {
@@ -252,11 +155,7 @@ function closeModal(modalId) {
 
 // Export functions to global scope
 window.createClassCard = createClassCard;
-window.createAttendanceRecord = createAttendanceRecord;
 window.createModal = createModal;
-window.loadStudentClasses = loadStudentClasses;
-window.loadTeacherClasses = loadTeacherClasses;
-window.populateClassSelects = populateClassSelects;
 window.toggleClassMenu = toggleClassMenu;
 window.closeModal = closeModal;
 window.exibirMenu = exibirMenu;

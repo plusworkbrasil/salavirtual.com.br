@@ -175,7 +175,9 @@ body {
     font-weight: 500;
     color: #dc2626;
 }
-#inicio:checked, #sair:checked {
+
+#inicio:checked,
+#sair:checked {
     transform: scale(0.9);
 }
 
@@ -207,9 +209,7 @@ body {
 }
 
 .hero-icon {
-    font-size: 4rem;
     color: var(--primary-blue);
-    margin-bottom: var(--spacing);
     animation: float 3s ease-in-out infinite;
 }
 
@@ -662,7 +662,7 @@ body {
         justify-content: center;
     }
 
-    .material-item{
+    .material-item {
         padding: 0px !important;
     }
 
@@ -770,10 +770,11 @@ body {
         font-size: 1.8rem;
     }
 
-    .raised-hand-item{
-        flex-direction:column;
+    .raised-hand-item {
+        flex-direction: column;
     }
-    .hand-actions{
+
+    .hand-actions {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -2080,6 +2081,56 @@ body {
 .material-icon .fa-external-link-alt {
     color: #0066cc;
 }
+
+#img-Logo{
+    width:190px;
+    height:50px;
+}
+#img-Pagina{
+    width:190px;
+    height:50px;
+}
+
+footer {
+    position: relative;
+    color: rgb(0, 0, 0);
+    background-color: rgb(249, 254, 255);
+    text-align: center;
+    padding-top: 30px;
+    padding-bottom: 10px;
+    font-family: 'Poppins', sans-serif;
+    overflow: hidden;
+    border:1px solid var(--gray-200);
+    border-radius: 5px 5px 10px 10px;
+}
+
+
+footer .contato a {
+    color: rgb(7, 115, 187);
+    font-size: 2.3rem;
+    margin: 0 10px;
+    text-decoration: none;
+    transition: transform 0.3s, color 0.3s;
+}
+
+footer .contato a {
+    color: rgb(7, 115, 187);
+    font-size: 2.3rem;
+    margin: 0 10px;
+    text-decoration: none;
+    transition: transform 0.3s, color 0.3s;
+}
+
+footer .contato a:hover{
+    transform: scale(1.2);
+    text-shadow: 1px 1px 1.5px rgb(7, 115, 187, 0.6);
+}
+
+footer p {
+    font-size: 14px;
+}
+
+
 
 /* Responsive Materials */
 @media (max-width: 768px) {

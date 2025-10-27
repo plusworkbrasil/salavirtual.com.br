@@ -40,7 +40,7 @@
 #voltarAluno {
     position: absolute ;
     top: 19%;
-    left: 5%;
+    left: 23%;
 }
 
 .btn-secondary {
@@ -616,13 +616,6 @@
     margin-bottom: var(--spacing-sm);
 }
 
-.attendance-photo {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--gray-300);
-}
 
 .attendance-info {
     flex: 1;
@@ -753,18 +746,20 @@
     }
 }
 
-@media (min-width: 1250px) {
+@media (max-width: 1250px) {
     #voltarAluno {
         top: 19%;
         left: 11%;
     }
 }
-@media (min-width: 1550px) {
+@media (max-width: 1550px) {
     #voltarAluno {
         top: 19%;
         left: 15%;
     }
 }
+
+
 
 @media(max-width: 900px) {
     #voltarAluno {

@@ -36,38 +36,38 @@ const RoomManager = {
         }
     },
 
-    joinRoom: async (roomCode) => {
-        try {
-            const room = await RoomService.getRoom(roomCode);
 
-            if (!room || !room.ativa) {
-                throw new Error('Sala não encontrada ou inativa');
-            }
-
-            RoomState.currentRoom = room;
-            RoomState.isStudent = true;
-            RoomState.roomCode = roomCode;
-
-            setTimeout(() => {
-                if (!StudentManager.currentStudentName) {
-                    StudentManager.showNameModal();
-                } else {
-                    StudentManager.updateStudentUI();
-                }
-            }, 500);
-
-            return room;
-        } catch (error) {
-            console.error('Erro ao entrar na sala:', error);
-            showToast(error.message || 'Erro ao entrar na sala', 'error');
-            throw error;
-        }
-    },
-
-    leaveRoom: () => {
+    leaveRoom: async () => {
         if (RoomState.isTeacher) {
             RoomManager.endRoom();
         } else if (RoomState.isStudent) {
+            try {
+                // Remover aluno do Firebase
+                if (RoomState.studentId && RoomState.roomCode) {
+                    await StudentService.deleteStudent(RoomState.studentId);
+
+                    // 🔥 TENTAR remover da lista de alunos conectados (se a sala ainda existir)
+                    try {
+                        const room = await RoomService.getRoom(RoomState.roomCode);
+                        if (room && room.alunosConectados) {
+                            const updatedStudents = room.alunosConectados.filter(
+                                student => student.id !== RoomState.studentId
+                            );
+                            await RoomService.updateRoom(RoomState.roomCode, {
+                                alunosConectados: updatedStudents
+                            });
+                        }
+                    } catch (error) {
+                        console.log('Sala já foi excluída ou não encontrada');
+                    }
+
+                    showToast('Você saiu da sala', 'info');
+                }
+            } catch (error) {
+                console.error('Erro ao sair da sala:', error);
+                showToast('Erro ao sair da sala', 'error');
+            }
+
             StudentManager.clear();
             RoomManager.clearListeners();
 
@@ -76,21 +76,6 @@ const RoomManager = {
             RoomState.roomCode = null;
             RoomState.studentId = null;
 
-            navigateTo('home');
-        }
-    },
-
-    endRoom: () => {
-        if (RoomState.isTeacher) {
-            RoomManager.clearListeners();
-
-            RoomState.currentRoom = null;
-            RoomState.isTeacher = false;
-            RoomState.roomCode = null;
-            RoomState.qrCodeGenerated = false;
-
-            exibirMenu();
-            showToast('Sala encerrada com sucesso', 'info');
             navigateTo('home');
         }
     },
@@ -149,8 +134,6 @@ const RoomManager = {
 
             const baseURL = window.location.origin + window.location.pathname;
             const qrData = `${baseURL}#join/${RoomState.roomCode}`;
-
-            console.log(qrData);
 
             if (typeof QRCode !== 'undefined') {
                 QRCode.toCanvas(qrData, { width: 256, margin: 2 }, (error, canvas) => {
@@ -217,113 +200,140 @@ const RoomManager = {
     },
 
     init: () => {
-        console.log('Room Manager inicializado');
-    }
-};
+    },
+    joinRoom: async (roomCode) => {
+        try {
+            const room = await RoomService.getRoom(roomCode);
 
-const QRScanner = {
-    video: null,
-    stream: null,
-    isScanning: false,
-
-    start: () => {
-        return new Promise((resolve, reject) => {
-            const video = document.getElementById('qr-video');
-            if (!video) {
-                reject('Elemento de vídeo não encontrado');
-                return;
+            if (!room || !room.ativa) {
+                throw new Error('Sala não encontrada ou inativa');
             }
 
-            navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
-            })
-                .then(stream => {
-                    QRScanner.stream = stream;
-                    video.srcObject = stream;
-                    video.play();
-                    QRScanner.isScanning = true;
-                    resolve(stream);
+            RoomState.currentRoom = room;
+            RoomState.isStudent = true;
+            RoomState.roomCode = roomCode;
 
-                    showToast('Câmera iniciada. Posicione o QR Code.', 'info');
+            // 🔥 NOVO: Escutar status da sala em tempo real
+            RoomManager.listenToRoomStatus();
 
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
+            setTimeout(() => {
+                if (!StudentManager.currentStudentName) {
+                    StudentManager.showNameModal();
+                } else {
+                    StudentManager.updateStudentUI();
+                }
+            }, 500);
 
-                    const scan = () => {
-                        if (!QRScanner.isScanning) return;
+            return room;
+        } catch (error) {
+            console.error('Erro ao entrar na sala:', error);
+            showToast(error.message || 'Erro ao entrar na sala', 'error');
+            throw error;
+        }
+    },
 
-                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                            canvas.height = video.videoHeight;
-                            canvas.width = video.videoWidth;
-                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // 🔥 NOVA FUNÇÃO: Escutar mudanças no status da sala
+    listenToRoomStatus: () => {
+        if (!RoomState.roomCode) return;
 
-                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                            const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-                            if (code) {
-                                QRScanner.isScanning = false;
-                                QRScanner.stop();
-                                showToast(`QR Detectado: ${code.data}`, 'success');
-
-                                // 🔹 Se o QR contém link (http:// ou https://)
-                                if (code.data.startsWith("http://") || code.data.startsWith("https://")) {
-                                    window.location.href = code.data;
-                                } else {
-                                    // 🔹 Caso seja um código da sala
-                                    joinRoomByCode(code.data);
-                                }
-                                return;
-                            }
-                        }
-
-                        requestAnimationFrame(scan);
-                    };
-
-                    requestAnimationFrame(scan);
-                })
-                .catch(error => {
-                    console.error('Erro ao acessar câmera:', error);
-                    reject('Não foi possível acessar a câmera');
-                });
+        const unsubscribe = RoomService.listenToRoomStatus(RoomState.roomCode, (room) => {
+            if (!room) {
+                // 🔥 SALA FOI EXCLUÍDA - desconectar aluno automaticamente
+                showToast('A sala foi encerrada pelo professor', 'info');
+                setTimeout(() => {
+                    RoomManager.forceLeaveRoom();
+                }, 2000);
+            } else if (!room.ativa) {
+                // Sala foi marcada como inativa
+                showToast('A sala foi encerrada pelo professor', 'info');
+                setTimeout(() => {
+                    RoomManager.forceLeaveRoom();
+                }, 2000);
+            }
         });
+
+        RoomState.unsubscribers.push(unsubscribe);
     },
 
-    stop: () => {
-        if (QRScanner.stream) {
-            QRScanner.stream.getTracks().forEach(track => track.stop());
-            QRScanner.stream = null;
-        }
-
-        if (QRScanner.video) {
-            QRScanner.video.srcObject = null;
-        }
-
-        QRScanner.isScanning = false;
-
-        const startBtn = document.getElementById('start-scanner-btn');
-        if (startBtn) {
-            startBtn.innerHTML = '<i class="fas fa-camera"></i> Iniciar Câmera';
-            startBtn.onclick = startQRScanner;
-        }
-    },
-
-    simulateDetection: (roomCode) => {
-        setTimeout(() => {
-            if (QRScanner.isScanning) {
-                showToast(`QR Code detectado: ${roomCode}`, 'success');
-                QRScanner.stop();
-                joinRoomByCode(roomCode);
+    // 🔥 NOVA FUNÇÃO: Forçar saída da sala (sem confirmação)
+    forceLeaveRoom: async () => {
+        try {
+            if (RoomState.studentId && RoomState.roomCode) {
+                await StudentService.deleteStudent(RoomState.studentId);
             }
-        }, 3000);
+        } catch (error) {
+            console.error('Erro ao remover aluno:', error);
+        }
+
+        StudentManager.clear();
+        RoomManager.clearListeners();
+
+        RoomState.isStudent = false;
+        RoomState.currentRoom = null;
+        RoomState.roomCode = null;
+        RoomState.studentId = null;
+
+        navigateTo('home');
+    },
+
+    endRoom: async () => {
+        if (RoomState.isTeacher && RoomState.roomCode) {
+            try {
+                showLoading();
+
+                // 🔥 PRIMEIRO: Buscar e excluir todos os alunos
+                const students = await StudentService.getStudentsByRoom(RoomState.roomCode);
+
+                // Excluir cada aluno individualmente
+                for (const student of students) {
+                    try {
+                        await StudentService.deleteStudent(student.id);
+                        console.log(`Aluno ${student.id} excluído`);
+                    } catch (error) {
+                        console.error(`Erro ao excluir aluno ${student.id}:`, error);
+                    }
+                }
+
+                // 🔥 SEGUNDO: Excluir a sala do Firebase
+                await RoomService.deleteRoom(RoomState.roomCode);
+
+                showToast('Sala excluída com sucesso! Todos os alunos foram desconectados.', 'success');
+
+            } catch (error) {
+                console.error('Erro ao excluir sala:', error);
+                showToast('Erro ao excluir sala: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+
+                // 🔥 LIMPE O ESTADO LOCAL
+                RoomManager.clearListeners();
+                RoomState.currentRoom = null;
+                RoomState.isTeacher = false;
+                RoomState.roomCode = null;
+                RoomState.qrCodeGenerated = false;
+                RoomState.connectedStudents = [];
+
+                // Navegar para home
+                setTimeout(() => {
+                    navigateTo('home');
+                }, 1000);
+            }
+        }
+    },
+
+    clearListeners: () => {
+        RoomState.unsubscribers.forEach(unsub => unsub());
+        RoomState.unsubscribers = [];
+        RoomState.connectedStudents = [];
     }
 };
+
 
 document.addEventListener('DOMContentLoaded', () => {
     RoomManager.init();
 });
 
 window.RoomManager = RoomManager;
-window.QRScanner = QRScanner;
 window.RoomState = RoomState;
 
 const StudentManager = {
@@ -407,7 +417,6 @@ const StudentManager = {
 
 
     init: () => {
-        console.log('Student Manager inicializado');
     },
 
     getName: () => {
@@ -423,7 +432,6 @@ const StudentManager = {
 document.addEventListener('DOMContentLoaded', () => {
     StudentManager.init();
     init: async () => {
-        console.log('Student Manager inicializado');
 
         // 🔧 Se o aluno já tem um ID salvo (voltou para a sala), buscar nome no Firebase
         if (RoomState.isStudent && RoomState.studentId && !StudentManager.currentStudentName) {
@@ -432,7 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (student && student.nome) {
                     StudentManager.currentStudentName = student.nome;
                     StudentManager.updateStudentUI();
-                    console.log('Nome restaurado do aluno:', student.nome);
                 }
             } catch (err) {
                 console.warn('Não foi possível restaurar o nome do aluno:', err);

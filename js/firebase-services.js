@@ -86,7 +86,23 @@ export const RoomService = {
         callback(doc.data().alunosConectados || []);
       }
     });
-  }
+  },
+  listenToRoomStatus: (codigo, callback) => {
+    const roomRef = doc(db, 'salas', codigo);
+    return onSnapshot(roomRef, (doc) => {
+      if (doc.exists()) {
+        const roomData = { id: doc.id, ...doc.data() };
+        callback(roomData);
+      } else {
+        // 🔥 SALA FOI EXCLUÍDA
+        callback(null);
+      }
+    });
+  },
+  async deleteRoom(codigo) {
+    const roomRef = doc(db, 'salas', codigo);
+    await deleteDoc(roomRef);
+  },
 };
 
 export const StudentService = {
@@ -160,6 +176,20 @@ export const StudentService = {
       });
       callback(raisedHands);
     });
+  },
+  deleteStudent: async (studentId) => {
+    const studentRef = doc(db, 'alunos', studentId);
+    await deleteDoc(studentRef);
+  },
+
+  getStudentsByRoom: async (codigoSala) => {
+    const q = query(collection(db, 'alunos'), where('codigoSala', '==', codigoSala));
+    const querySnapshot = await getDocs(q);
+    const students = [];
+    querySnapshot.forEach((doc) => {
+      students.push({ id: doc.id, ...doc.data() });
+    });
+    return students;
   }
 };
 

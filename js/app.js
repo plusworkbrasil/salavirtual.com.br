@@ -92,7 +92,6 @@ function navigateTo(page) {
         inicio.style.display = "none";
     }
 
-    console.log(`Navegando para: ${page}`);
 
     AppState.currentPage = page;
 
@@ -168,17 +167,13 @@ function initializeHomePage() {
 
 // Initialize student panel
 function initializeStudentPanel() {
-    console.log('Painel do aluno carregado');
     loadStudentClasses();
 }
 
 // Initialize teacher panel
 function initializeTeacherPanel() {
-    console.log('Painel do professor carregado');
     loadTeacherClasses();
     loadTeacherMaterials();
-    loadHelpRequests();
-    loadReports();
     loadAttendanceRecords();
 }
 
@@ -267,57 +262,6 @@ function closeAllSections() {
     });
 }
 
-// Student Panel Functions
-function openTaskSubmission() {
-    closeAllSections();
-    const section = document.getElementById('task-submission-section');
-    if (section) {
-        section.style.display = 'block';
-        section.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-
-function openHelpForm() {
-    closeAllSections();
-    const section = document.getElementById('help-form-section');
-    if (section) {
-        section.style.display = 'block';
-        section.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-
-function openMyClasses() {
-    closeAllSections();
-    const section = document.getElementById('my-classes-section');
-    if (section) {
-        section.style.display = 'block';
-        section.scrollIntoView({ behavior: 'smooth' });
-        loadStudentClasses();
-    }
-}
-
-// Teacher Panel Functions
-function openManageClasses() {
-    closeAllSections();
-    const section = document.getElementById('manage-classes-section');
-    if (section) {
-        section.style.display = 'block';
-        section.scrollIntoView({ behavior: 'smooth' });
-        loadTeacherClasses();
-    }
-}
-
-function openTempLink() {
-    closeAllSections();
-    const section = document.getElementById('temp-link-section');
-    if (section) {
-        section.style.display = 'block';
-        section.scrollIntoView({ behavior: 'smooth' });
-        populateClassSelects();
-    }
-}
 
 
 
@@ -333,45 +277,9 @@ function openHelpRequests() {
 }
 
 
-
-
-// Form submission functions
-function submitTask() {
-    const title = document.getElementById('task-title')?.value;
-    const description = document.getElementById('task-description')?.value;
-    const file = document.getElementById('task-file')?.files[0];
-
-    if (!title || !description) {
-        showToast('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-
-    // Simulate task submission
-    showLoading();
-    setTimeout(() => {
-        hideLoading();
-        showToast('Tarefa enviada com sucesso!');
-
-        // Clear form
-        document.getElementById('task-title').value = '';
-        document.getElementById('task-description').value = '';
-        document.getElementById('task-file').value = '';
-
-        closeAllSections();
-    }, 1500);
-}
-
-
-
-// Quiz functions
-
-
 const api = {
     salas: { getAll: async () => [] },
-    quizzes: { getAll: async () => [] },
-    materiais: { getAll: async () => [] },
     maosLevantadas: { getAll: async () => [] },
-    presencas: { getAll: async () => [] }
 };
 
 
@@ -379,267 +287,16 @@ const api = {
 async function loadMockData() {
     try {
         AppState.classes = await api.salas.getAll();
-        AppState.quizzes = await api.quizzes.getAll();
-        AppState.materials = await api.materiais.getAll();
-        AppState.helpRequests = await api.maosLevantadas.getAll(); // Assumindo que helpRequests são mãos levantadas
-        AppState.reports = []; // Não há tabela para reports, manter vazio ou criar uma
-        AppState.attendanceRecords = await api.presencas.getAll();
-        console.log("Dados carregados da API", AppState);
     } catch (error) {
         showToast("Erro ao carregar dados iniciais: " + error.message, "error");
         console.error("Erro ao carregar dados iniciais:", error);
     }
 }
 
-window.submitTask = submitTask;
-
 // Teacher panel functions
-window.openManageClasses = openManageClasses;
-window.openTempLink = openTempLink;
 window.openHelpRequests = openHelpRequests;
 
 
-
-
-// Additional Panel Functions
-
-// Class Management Functions
-function openCreateClassModal() {
-    const modalContent = `
-        <div class="form-group">
-            <label>Nome da Turma</label>
-            <input type="text" id="new-class-name" placeholder="Digite o nome da turma">
-        </div>
-        <div class="form-group">
-            <label>Disciplina</label>
-            <input type="text" id="new-class-subject" placeholder="Digite a disciplina">
-        </div>
-        <div class="form-group">
-            <label>Horário</label>
-            <input type="text" id="new-class-schedule" placeholder="Ex: Seg/Qua/Sex 08:00-09:30">
-        </div>
-        <div class="form-group">
-            <label>Máximo de Alunos</label>
-            <input type="number" id="new-class-max-students" value="30" min="1">
-        </div>
-    `;
-
-    const saveBtn = DOM.create('button', {
-        className: 'btn btn-primary',
-        onclick: 'createClass()'
-    }, 'Criar Turma');
-
-    const cancelBtn = DOM.create('button', {
-        className: 'btn btn-secondary',
-        onclick: "closeModal('create-class-modal')"
-    }, 'Cancelar');
-
-    const modal = createModal('create-class-modal', 'Criar Nova Turma', modalContent, [cancelBtn, saveBtn]);
-
-    // Add modal to container
-    const modalContainer = DOM.get('modal-container');
-    modalContainer.innerHTML = '';
-    modalContainer.appendChild(modal);
-
-    // Show modal
-    modal.classList.add('active');
-    modal.style.display = 'flex';
-}
-
-function createClass() {
-    const name = DOM.get('new-class-name')?.value;
-    const subject = DOM.get('new-class-subject')?.value;
-    const schedule = DOM.get('new-class-schedule')?.value;
-    const maxStudents = DOM.get('new-class-max-students')?.value;
-
-    if (!name || !subject || !schedule) {
-        showToast('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-
-    showLoading();
-
-    setTimeout(() => {
-        const newClass = {
-            id: Date.now(),
-            name: name,
-            subject: subject,
-            teacher: 'Prof. Atual',
-            students: 0,
-            schedule: schedule,
-            code: StringUtils.generateClassCode(),
-            maxStudents: parseInt(maxStudents) || 30
-        };
-
-        AppState.classes.push(newClass);
-
-        hideLoading();
-        showToast('Turma criada com sucesso!', 'success');
-        closeModal('create-class-modal');
-        loadTeacherClasses();
-        populateClassSelects();
-    }, 1500);
-}
-
-function openJoinClassModal() {
-    const modalContent = `
-        <div class="form-group">
-            <label>Código da Turma</label>
-            <input type="text" id="join-class-code" placeholder="Digite o código da turma (ex: MAT001)" maxlength="6">
-        </div>
-        <p class="text-sm text-gray-600">
-            Solicite o código da turma ao seu professor ou use o QR Code fornecido.
-        </p>
-    `;
-
-    const joinBtn = DOM.create('button', {
-        className: 'btn btn-primary',
-        onclick: 'joinClass()'
-    }, 'Entrar na Turma');
-
-    const cancelBtn = DOM.create('button', {
-        className: 'btn btn-secondary',
-        onclick: "closeModal('join-class-modal')"
-    }, 'Cancelar');
-
-    const modal = createModal('join-class-modal', 'Entrar em Turma', modalContent, [cancelBtn, joinBtn]);
-
-    // Add modal to container
-    const modalContainer = DOM.get('modal-container');
-    modalContainer.innerHTML = '';
-    modalContainer.appendChild(modal);
-
-    // Show modal
-    modal.classList.add('active');
-    modal.style.display = 'flex';
-}
-
-function joinClass() {
-    const code = DOM.get('join-class-code')?.value?.toUpperCase();
-
-    if (!code) {
-        showToast('Por favor, digite o código da turma', 'error');
-        return;
-    }
-
-    if (!Validator.isValidClassCode(code)) {
-        showToast('Código inválido. Use o formato ABC123', 'error');
-        return;
-    }
-
-    showLoading();
-
-    setTimeout(() => {
-        // Simulate class validation
-        const classExists = AppState.classes.find(c => c.code === code);
-
-        if (!classExists) {
-            hideLoading();
-            showToast('Turma não encontrada. Verifique o código e tente novamente.', 'error');
-            return;
-        }
-
-        if (classExists.students >= classExists.maxStudents) {
-            hideLoading();
-            showToast('Turma lotada. Não é possível entrar nesta turma.', 'warning');
-            return;
-        }
-
-        // Add student to class
-        classExists.students += 1;
-
-        hideLoading();
-        showToast(`Você entrou na turma ${classExists.name}!`, 'success');
-        closeModal('join-class-modal');
-        loadStudentClasses();
-    }, 2000);
-}
-
-function leaveClass(classId) {
-    if (confirm('Tem certeza que deseja sair desta turma?')) {
-        const classData = AppState.classes.find(c => c.id === classId);
-        if (classData && classData.students > 0) {
-            classData.students -= 1;
-        }
-
-        showToast('Você saiu da turma', 'info');
-        loadStudentClasses();
-    }
-}
-
-function editClass(classId) {
-    showToast('Funcionalidade de edição em desenvolvimento', 'info');
-}
-
-function deleteClass(classId) {
-    if (confirm('Tem certeza que deseja excluir esta turma? Esta ação não pode ser desfeita.')) {
-        AppState.classes = AppState.classes.filter(c => c.id !== classId);
-        showToast('Turma excluída com sucesso', 'success');
-        loadTeacherClasses();
-        populateClassSelects();
-    }
-}
-
-// Temporary Link Generation
-function generateTempLink() {
-    const classId = DOM.get('temp-link-class')?.value;
-    const expiryHours = DOM.get('temp-link-expiry')?.value;
-
-    if (!classId) {
-        showToast('Por favor, selecione uma turma', 'error');
-        return;
-    }
-
-    const classData = AppState.classes.find(c => c.id == classId);
-    if (!classData) {
-        showToast('Turma não encontrada', 'error');
-        return;
-    }
-
-    showLoading();
-
-    setTimeout(() => {
-        const linkId = StringUtils.generateRandomString(12);
-        const baseURL = window.location.origin + window.location.pathname;
-        const tempLink = `${baseURL}#join/${classData.code}/${linkId}`;
-
-        const expiryDate = DateUtils.addHours(new Date(), parseInt(expiryHours));
-
-        // Show result
-        const resultSection = DOM.get('temp-link-result');
-        const linkInput = DOM.get('generated-link');
-        const expirySpan = DOM.get('link-expiry-time');
-
-        if (resultSection && linkInput && expirySpan) {
-            linkInput.value = tempLin
-            expirySpan.textContent = DateUtils.formatDateTime(expiryDate);
-            resultSection.style.display = 'block';
-        }
-
-        hideLoading();
-        showToast('Link temporário gerado com sucesso!', 'success');
-
-        // Auto copy to clipboard
-        copyToClipboard('generated-link');
-
-    }, 1500);
-}
-
-// Material Upload
-
-
-
-
-
-// Export new functions
-window.openCreateClassModal = openCreateClassModal;
-window.createClass = createClass;
-window.openJoinClassModal = openJoinClassModal;
-window.joinClass = joinClass;
-window.leaveClass = leaveClass;
-window.editClass = editClass;
-window.deleteClass = deleteClass;
-window.generateTempLink = generateTempLink;
 
 
 
@@ -763,8 +420,6 @@ function startQRScanner() {
 
 // Teacher Panel Functions
 function initializeTeacherPanel() {
-    console.log('Painel do professor carregado');
-
 
     // Create room automatically when teacher panel loads
     if (!RoomState.isTeacher && !RoomState.currentRoom) {
@@ -866,28 +521,7 @@ function raiseHand() {
 }
 
 
-
-function viewActivities() {
-    showToast('Carregando atividades disponíveis...', 'info');
-}
-
-function toggleChat() {
-    const chatElement = document.getElementById('room-chat');
-    if (chatElement) {
-        chatElement.style.display = chatElement.style.display === 'none' ? 'block' : 'none';
-    }
-}
-
-
-
 // Load Functions for Teacher Panel
-
-
-
-
-function createActivity() {
-    showToast('Funcionalidade de criação de atividades em desenvolvimento', 'info');
-}
 
 // Update navigation to handle new pages
 const originalNavigateTo = navigateTo;
@@ -918,9 +552,6 @@ window.downloadQRCode = downloadQRCode;
 window.endRoom = endRoom;
 window.leaveRoom = leaveRoom;
 window.raiseHand = raiseHand;
-window.viewActivities = viewActivities;
-window.toggleChat = toggleChat;
-window.createActivity = createActivity;
 
 
 // Student Name Functions
@@ -1039,7 +670,6 @@ window.addEventListener('DOMContentLoaded', () => {
         // Pega o código da sala (tudo depois de "#join/")
         const roomCode = hash.replace('#join/', '').trim();
 
-        console.log("QR detectado! Código da sala:", roomCode);
 
         // Mostra a interface de estudante
         showStudentAccess();

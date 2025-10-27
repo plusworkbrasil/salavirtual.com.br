@@ -4,10 +4,66 @@ const HandRaiseState = {
     raisedHands: [],
     studentHandRaised: false,
     lastHandRaiseTime: null,
-    unsubscribers: []
+    unsubscribers: [],
+    notificationSound: null // Adicione esta linha
 };
 
 const HandRaiseManager = {
+
+    // FUNÇÃO PARA INICIALIZAR O SOM - ADICIONE ISSO
+    initNotificationSound: () => {
+        try {
+            // Cria o som usando Howler.js
+            HandRaiseState.notificationSound = new Howl({
+                src: ['sons/notificacao.mp3'],
+                volume: 1.0,
+                preload: true,
+                onloaderror: function() {
+                    HandRaiseManager.createFallbackSound();
+                }
+            });
+        } catch (error) {
+            console.warn('Erro ao inicializar Howler:', error);
+            HandRaiseManager.createFallbackSound();
+        }
+    },
+
+    // SOM ALTERNATIVO SE O HOWLER FALHAR - ADICIONE ISSO
+    createFallbackSound: () => {
+        try {
+            // Cria um som simples como fallback
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (error) {
+            console.log('Áudio não suportado');
+        }
+    },
+
+    // FUNÇÃO PARA TOCAR O SOM - ADICIONE ISSO
+    playNotificationSound: () => {
+        if (HandRaiseState.notificationSound) {
+            try {
+                HandRaiseState.notificationSound.play();
+            } catch (error) {
+                console.warn('Erro ao tocar som com Howler:', error);
+                HandRaiseManager.createFallbackSound();
+            }
+        } else {
+            HandRaiseManager.createFallbackSound();
+        }
+    },
 
     raiseHand: async () => {
         const studentId = RoomState.studentId;
@@ -61,11 +117,15 @@ const HandRaiseManager = {
         }
     },
 
+    // MODIFIQUE ESTA FUNÇÃO - ADICIONE A LINHA DO SOM
     showTeacherNotification: (count) => {
         const existingNotification = document.querySelector('.raised-hand-notification');
         if (existingNotification) {
             existingNotification.remove();
         }
+
+        // 🔥 ADICIONE ESTA LINHA PARA TOCAR O SOM - É SÓ ISSO!
+        HandRaiseManager.playNotificationSound();
 
         const notification = document.createElement('div');
         notification.className = 'raised-hand-notification';
@@ -73,6 +133,7 @@ const HandRaiseManager = {
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <i class="fas fa-hand-paper"></i>
                 <span>${count} aluno${count > 1 ? 's' : ''} com a mão levantada</span>
+                <i class="fas fa-volume-up" style="margin-left: auto;"></i>
             </div>
         `;
 
@@ -152,7 +213,6 @@ const HandRaiseManager = {
             console.warn("RoomCode não disponível para listenToRaisedHands.");
             return;
         }
-        console.log("listenToRaisedHands ativado para sala:", RoomState.roomCode);
         // Limpa listeners anteriores para evitar duplicação
         HandRaiseState.unsubscribers.forEach(unsub => unsub());
         HandRaiseState.unsubscribers = [];
@@ -172,6 +232,9 @@ const HandRaiseManager = {
     },
 
     init: async () => {
+        // 🔥 INICIALIZA O SOM QUANDO O HAND RAISE MANAGER COMEÇA
+        HandRaiseManager.initNotificationSound();
+
         if (RoomState.isTeacher && RoomState.roomCode) {
             HandRaiseManager.listenToRaisedHands();
         }
@@ -190,6 +253,11 @@ const HandRaiseManager = {
         HandRaiseState.raisedHands = [];
         HandRaiseState.studentHandRaised = false;
         HandRaiseState.lastHandRaiseTime = null;
+        
+        // Limpa o som do Howler se existir
+        if (HandRaiseState.notificationSound) {
+            HandRaiseState.notificationSound.unload();
+        }
     },
 
 };
@@ -207,7 +275,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     await waitForRoomState();
-    console.log("RoomState detectado:", RoomState);
+
+    HandRaiseManager.init();
+});
+
+window.HandRaiseManager = HandRaiseManager;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Aguarda o RoomState carregar corretamente
+    const waitForRoomState = async () => {
+        return new Promise(resolve => {
+            const check = () => {
+                if (RoomState && RoomState.roomCode) resolve();
+                else setTimeout(check, 300);
+            };
+            check();
+        });
+    };
+
+    await waitForRoomState();
 
     HandRaiseManager.init();
 });
