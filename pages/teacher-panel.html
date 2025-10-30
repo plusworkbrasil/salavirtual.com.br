@@ -1,7 +1,7 @@
 <div class="panel-page teacher-panel">
     <div class="panel-header">
         <h1><i class="fas fa-chalkboard-teacher"></i> Painel do Professor</h1>
-        
+
         <!-- Room Code Display -->
         <div class="room-code-display">
             <div class="code-info">
@@ -29,7 +29,7 @@
             <p>Crie QR Code para acesso à sala</p>
         </div>
 
-        <!-- Quiz -->
+        <!-- Pessoas -->
 
 
         <!-- Mãos Levantadas -->
@@ -49,7 +49,7 @@
         <div class="content-section" id="qr-code-section" style="display: none;">
             <div class="section-header">
                 <h2>QR Code</h2>
-                <button class="btn btn-secondary" onclick="closeAllSections()">
+                <button class="btn btn-secondary fechar" onclick="closeAllSections()">
                     <i class="fas fa-times"></i> Fechar
                 </button>
             </div>
@@ -67,7 +67,7 @@
                         <i class="fas fa-download"></i>
                         Baixar QR Code
                     </button>
-                    
+
                 </div>
             </div>
         </div>
@@ -77,11 +77,11 @@
             <div class="section-header">
                 <h2>Mãos Levantadas</h2>
                 <div class="section-actions">
-                    <button class="btn btn-secondary" onclick="HandRaiseManager.clearAllHands()">
+                    <button class="btn btn-secondary limpar" onclick="HandRaiseManager.clearAllHands()">
                         <i class="fas fa-eraser"></i>
                         Limpar
                     </button>
-                    <button class="btn btn-secondary" onclick="closeAllSections()">
+                    <button class="btn btn-secondary fechar" onclick="closeAllSections()">
                         <i class="fas fa-times"></i>
                         Fechar
                     </button>
@@ -89,16 +89,31 @@
             </div>
             <div class="raised-hands-list"></div>
         </div>
-        
+
+        <!-- Pessoas Conetadas -->
+        <div class="content-sectionfixo" id="connected-students-section">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> Alunos Conectados</h2>
+                <div class="section-actions">
+                </div>
+            </div>
+            <div class="connected-students-list" id="connected-students-list">
+                <!-- Lista de alunos será gerada aqui -->
+            </div>
+        </div>
+
     </div>
 </div>
-
 
 <script type="module">
     import { HandRaiseManager } from '../js/hand-raise.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         HandRaiseManager.init();
+        if (RoomState.isTeacher && RoomState.roomCode) {
+            RoomManager.listenToRoomUpdates();
+            RoomManager.updateConnectedStudentsDisplay();
+        }
     });
 
     window.HandRaiseManager = HandRaiseManager;
@@ -108,4 +123,5 @@
         document.getElementById('raised-hands-section').style.display = 'block';
         HandRaiseManager.updateTeacherHandsDisplay();
     };
+    window.openConnectedStudents = openConnectedStudents;
 </script>

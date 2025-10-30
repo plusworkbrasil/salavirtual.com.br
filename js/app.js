@@ -79,6 +79,7 @@ function navigateTo(page) {
     }
     if (page != "home") {
         if (page == "teacher-panel") {
+            RoomManager.openConnectedStudents();
             buttonSair.onclick = endRoom;
             spanText.textContent = "Desativar";
         } else {
@@ -100,6 +101,12 @@ function navigateTo(page) {
     loadPageContent(page);
     updateNavigationState(page);
 }
+
+function openConnectedStudents() {
+    RoomManager.openConnectedStudents();
+}
+
+window.openConnectedStudents = openConnectedStudents;
 
 // Load page content dynamically
 async function loadPageContent(page) {
@@ -569,7 +576,7 @@ function confirmStudentName() {
             setTimeout(() => {
                 hideLoading();
                 closeAllSections();
-            }, 1700);
+            }, 2200);
         };
     };
 };
@@ -622,22 +629,40 @@ window.confirmStudentName = confirmStudentName;
 
 // Student function to raise/lower hand
 function raiseHand() {
+    const statusMao = document.querySelector(".feature-item h3");
+
+    const iconEmoje = document.querySelector(".feature-icon p");
+
+    const divCriacao = document.createElement("div");
+    divCriacao.classList.add("status-circle");
     const studentName = StudentManager.getName();
     if (!studentName) {
         showToast('Por favor, digite seu nome primeiro', 'error');
         return;
     }
-
-    const icone = document.querySelector("#iconeMao i")
-    if (icone.classList.contains("fa-hand-paper")) {
-        icone.classList.remove("fa-hand-paper");
+    const icone = document.querySelector("#iconeMao i");
+    if (icone.classList.contains("fa-hand-point-up")) {
+        //Icone
+        icone.classList.remove("fa-hand-point-up");
         icone.classList.add("fa-hand-fist");
+
+        iconEmoje.textContent = "✊";
+
+        //Texto
+        statusMao.innerHTML = "Mão Abaixada ";
+        divCriacao.style.backgroundColor = "red";
+        statusMao.appendChild(divCriacao);
     } else {
         icone.classList.remove("fa-hand-fist");
-        icone.classList.add("fa-hand-paper");
+        icone.classList.add("fa-hand-point-up");
+
+        iconEmoje.textContent = "🙋‍♂️";
+
+        //Texto
+        divCriacao.style.backgroundColor = "blue";
+        statusMao.innerHTML = "Mão Levantada ";
+        statusMao.appendChild(divCriacao);
     }
-
-
     HandRaiseManager.raiseHand(studentName);
 }
 

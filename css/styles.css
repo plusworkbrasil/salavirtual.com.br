@@ -283,7 +283,7 @@ body {
 }
 
 .feature-icon {
-    font-size: 3rem;
+    font-size: 3.27rem;
     color: var(--primary-blue);
     margin-bottom: var(--spacing);
 }
@@ -298,6 +298,16 @@ body {
 .feature-card p {
     color: var(--gray-600);
     line-height: 1.6;
+}
+
+/* Circulo de status do icon */
+
+.status-circle{
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    margin-left: 10px;
 }
 
 /* Panel Pages */
@@ -380,6 +390,23 @@ body {
 }
 
 .content-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    animation: slideIn 0.3s ease-out;
+}
+
+.connected-students-list{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+   
+
+.content-sectionfixo {
     background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
@@ -769,6 +796,10 @@ body {
     .section-header h2 {
         font-size: 1.8rem;
     }
+    .iconBlue {
+    color: red;
+    margin-right: 10px;
+}
 
     .raised-hand-item {
         flex-direction: column;
@@ -1150,19 +1181,20 @@ body {
 }
 
 .feature-icon {
-    font-size: 2.5rem;
     color: #0066cc;
     margin-bottom: 1rem;
 }
 
 .feature-item h3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: #1a202c;
     margin-bottom: 0.5rem;
 }
 
 .feature-item p {
     color: #64748b;
-    margin-bottom: 1.5rem;
 }
 
 /* Panel Card Danger Style */
@@ -1327,7 +1359,6 @@ body {
 .modal-header {
     padding: 1.5rem 1.5rem 0;
     border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 1.5rem;
 }
 
 .modal-header h3 {

@@ -108,11 +108,11 @@ const HandRaiseManager = {
 
         if (HandRaiseState.studentHandRaised) {
             icon.className = 'fas fa-hand-paper';
-            text.textContent = 'Abaixar Mão';
+            text.innerHTML = 'Abaixar Mão';
             handButton.classList.add('hand-raised');
         } else {
             icon.className = 'fas fa-hand-fist';
-            text.textContent = 'Levantar a Mão';
+            text.innerHTML = 'Levantar a Mão';
             handButton.classList.remove('hand-raised');
         }
     },

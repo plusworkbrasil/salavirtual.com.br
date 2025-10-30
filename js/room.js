@@ -213,7 +213,6 @@ const RoomManager = {
             RoomState.isStudent = true;
             RoomState.roomCode = roomCode;
 
-            // 🔥 NOVO: Escutar status da sala em tempo real
             RoomManager.listenToRoomStatus();
 
             setTimeout(() => {
@@ -232,7 +231,6 @@ const RoomManager = {
         }
     },
 
-    // 🔥 NOVA FUNÇÃO: Escutar mudanças no status da sala
     listenToRoomStatus: () => {
         if (!RoomState.roomCode) return;
 
@@ -255,7 +253,6 @@ const RoomManager = {
         RoomState.unsubscribers.push(unsubscribe);
     },
 
-    // 🔥 NOVA FUNÇÃO: Forçar saída da sala (sem confirmação)
     forceLeaveRoom: async () => {
         try {
             if (RoomState.studentId && RoomState.roomCode) {
@@ -294,7 +291,6 @@ const RoomManager = {
                     }
                 }
 
-                // 🔥 SEGUNDO: Excluir a sala do Firebase
                 await RoomService.deleteRoom(RoomState.roomCode);
 
                 showToast('Sala excluída com sucesso! Todos os alunos foram desconectados.', 'success');
@@ -325,7 +321,66 @@ const RoomManager = {
         RoomState.unsubscribers.forEach(unsub => unsub());
         RoomState.unsubscribers = [];
         RoomState.connectedStudents = [];
-    }
+    },
+    openConnectedStudents: () => {
+        closeAllSections();
+        const section = document.getElementById('connected-students-section');
+        if (section) {
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth' });
+            RoomManager.updateConnectedStudentsDisplay();
+        }
+    },
+
+    updateConnectedStudentsDisplay: () => {
+        const studentsList = document.getElementById('connected-students-list');
+        if (!studentsList) {
+            console.log("Elemento connected-students-list não encontrado");
+            return;
+        }
+
+        if (RoomState.connectedStudents.length === 0) {
+            studentsList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>Nenhum aluno conectado no momento</p>
+            </div>
+        `;
+            return;
+        }
+
+        studentsList.innerHTML = RoomState.connectedStudents.map(student => `
+        <div class="connected-student-item">
+            <div class="student-info">
+                <div class="student-avatar">
+                    ${student.nome ? student.nome.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div>
+                    <div class="student-name">${student.nome || 'Aluno'}</div>
+                    <div class="student-join-time">
+                        Conectado em: ${student.conectadoEm ?
+                new Date(student.conectadoEm).toLocaleString('pt-BR') :
+                'Agora'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    },
+
+    listenToRoomUpdates: () => {
+        if (!RoomState.roomCode) return;
+
+        const unsubscribe = RoomService.listenToStudents(RoomState.roomCode, (students) => {
+            RoomState.connectedStudents = students;
+            RoomManager.updateTeacherUI();
+
+            // 🔥 SEMPRE atualiza a lista, independente da seção estar visível
+            RoomManager.updateConnectedStudentsDisplay();
+        });
+
+        RoomState.unsubscribers.push(unsubscribe);
+    },
 };
 
 
@@ -426,7 +481,7 @@ const StudentManager = {
     clear: () => {
         StudentManager.currentStudentName = null;
         RoomState.studentId = null;
-    }
+    },
 };
 
 document.addEventListener('DOMContentLoaded', () => {
