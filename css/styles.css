@@ -55,6 +55,10 @@
     --spacing-lg: 1.6rem;
     --spacing-xl: 3rem;
     --spacing-2xl: 4rem;
+
+    /* ScroolBar*/
+    --scroll-thumb: #3385d6;
+    --scroll-track: #f1f1f1;
 }
 
 body {
@@ -302,7 +306,7 @@ body {
 
 /* Circulo de status do icon */
 
-.status-circle{
+.status-circle {
     border-radius: 50%;
     width: 10px;
     height: 10px;
@@ -396,15 +400,19 @@ body {
     padding: var(--spacing-xl);
     margin-bottom: var(--spacing-lg);
     animation: slideIn 0.3s ease-out;
+    max-height: 670px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
 }
 
-.connected-students-list{
+.connected-students-list {
     display: flex;
     flex-direction: column;
     gap: 30px;
 }
 
-   
+
 
 .content-sectionfixo {
     background: var(--white);
@@ -413,7 +421,33 @@ body {
     padding: var(--spacing-xl);
     margin-bottom: var(--spacing-lg);
     animation: slideIn 0.3s ease-out;
+    max-height: 670px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 10px;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--scroll-track);
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-thumb);
+    border-radius: 20px;
+    border: 2px solid var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--scroll-thumb) 80%, black);
+}
+
+
 
 @keyframes slideIn {
     from {
@@ -796,10 +830,11 @@ body {
     .section-header h2 {
         font-size: 1.8rem;
     }
+
     .iconBlue {
-    color: red;
-    margin-right: 10px;
-}
+        color: red;
+        margin-right: 10px;
+    }
 
     .raised-hand-item {
         flex-direction: column;
@@ -820,6 +855,26 @@ body {
     .code-header h2,
     .scanner-header h2 {
         font-size: 2.2rem !important;
+    }
+
+    .code-info span.code-value {
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    #gerarNovo {}
+
+    .room-code-display {
+        padding: 0.9rem !important;
+    }
+
+    .section-actions {
+        width: 56%;
+        margin-left: 22%;
+    }
+
+    .content-section {
+        padding: 1.2rem;
     }
 }
 
@@ -1316,6 +1371,8 @@ body {
 .student-name-modal-content {
     max-width: 400px;
     width: 90%;
+    pointer-events: none;
+    z-index: 999.9;
 }
 
 .student-name-input {
@@ -1325,6 +1382,8 @@ body {
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+    z-index: 10;
+    ;
 }
 
 .student-name-input:focus {
@@ -2113,13 +2172,14 @@ body {
     color: #0066cc;
 }
 
-#img-Logo{
-    width:190px;
-    height:50px;
+#img-Logo {
+    width: 190px;
+    height: 50px;
 }
-#img-Pagina{
-    width:190px;
-    height:50px;
+
+#img-Pagina {
+    width: 190px;
+    height: 50px;
 }
 
 footer {
@@ -2131,7 +2191,7 @@ footer {
     padding-bottom: 10px;
     font-family: 'Poppins', sans-serif;
     overflow: hidden;
-    border:1px solid var(--gray-200);
+    border: 1px solid var(--gray-200);
     border-radius: 5px 5px 10px 10px;
 }
 
@@ -2152,7 +2212,7 @@ footer .contato a {
     transition: transform 0.3s, color 0.3s;
 }
 
-footer .contato a:hover{
+footer .contato a:hover {
     transform: scale(1.2);
     text-shadow: 1px 1px 1.5px rgb(7, 115, 187, 0.6);
 }

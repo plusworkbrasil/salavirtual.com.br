@@ -172,8 +172,10 @@
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 999.9;
     padding: var(--spacing);
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .modal.active {
@@ -189,6 +191,7 @@
     max-height: 90vh;
     overflow-y: auto;
     animation: modalSlideIn 0.3s ease-out;
+    pointer-events: all;
 }
 
 @keyframes modalSlideIn {

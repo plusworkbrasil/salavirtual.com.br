@@ -82,11 +82,12 @@ function navigateTo(page) {
             RoomManager.openConnectedStudents();
             buttonSair.onclick = endRoom;
             spanText.textContent = "Desativar";
+            buttonSair.style.display = "flex";
         } else {
             buttonSair.onclick = leaveRoom;
             spanText.textContent = "Sair";
+            buttonSair.style.display = "none";
         }
-        buttonSair.style.display = "flex";
         inicio.style.display = "none";
     } else {
         buttonSair.style.display = "none";
@@ -571,6 +572,10 @@ function confirmStudentName() {
         if (nameInput) {
             nameInput.value = ''
 
+            const buttonSair = document.getElementById("sair");
+            buttonSair.style.display = "flex";
+            console.log("até aqui")
+
             //tempo de gaantia de carregamento do Mão Levantada e as outras coisas
             showLoading();
             setTimeout(() => {
@@ -580,6 +585,25 @@ function confirmStudentName() {
         };
     };
 };
+
+//  
+//     const spanText = buttonSair.querySelector("span");
+//     const nav = document.querySelector(".nav");
+//     const inicio = document.querySelector("#inicio")
+
+
+//     if (page == "home" && nav.classList.contains("show")) {
+//         exibirMenu();
+//     }
+//     if (page != "home") {
+//         if (page == "teacher-panel") {
+//             RoomManager.openConnectedStudents();
+//             buttonSair.onclick = endRoom;
+//             spanText.textContent = "Desativar";
+//         } else {
+//             buttonSair.onclick = leaveRoom;
+//             spanText.textContent = "Sair";
+//         }
 
 // Handle Enter key in student name input
 document.addEventListener('DOMContentLoaded', () => {
@@ -592,6 +616,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const hash = window.location.hash;
